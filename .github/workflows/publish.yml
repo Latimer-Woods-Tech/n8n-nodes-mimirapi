@@ -1,0 +1,51 @@
+# Publishes n8n-nodes-mimirapi to npm with Sigstore provenance.
+#
+# Provenance is REQUIRED for n8n community-node verification (since May 2026)
+# and npm only attests provenance for workflows running in the package's
+# public source repository — which is why this repo exists standalone.
+#
+# Trigger: manual dispatch (version bumps are deliberate acts, never implicit).
+name: Publish to npm
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # Sigstore provenance attestation
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: n8n community-package scan (the verification pre-gate)
+        run: npx --yes @n8n/scan-community-package --local . || true
+        # Advisory pre-publish; the authoritative scan runs against the
+        # published tarball (see README "Verification" section).
+
+      - name: Publish with provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --provenance

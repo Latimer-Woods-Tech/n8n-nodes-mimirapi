@@ -1,0 +1,66 @@
+{
+  "name": "n8n-nodes-mimirapi",
+  "version": "0.1.1",
+  "description": "n8n community node for MimirAPI \u2014 pay-per-call tools for agents over x402 (USDC on Base): provenance certificates, QR / social-card / chart SVGs, price routing, phone intel, and more. No API key, no signup.",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "mimirapi",
+    "x402",
+    "micropayment",
+    "usdc",
+    "agents",
+    "provenance",
+    "qr-code",
+    "og-image"
+  ],
+  "license": "MIT",
+  "homepage": "https://mimirapi.com",
+  "author": {
+    "name": "Latimer Woods Tech"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Latimer-Woods-Tech/n8n-nodes-mimirapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Latimer-Woods-Tech/n8n-nodes-mimirapi/issues"
+  },
+  "engines": {
+    "node": ">=18.10"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage",
+    "lint": "eslint nodes credentials --ext .ts --max-warnings 0",
+    "lint:fix": "eslint nodes credentials --ext .ts --fix",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/MimirApiApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/MimirApi/MimirApi.node.js"
+    ]
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "@vitest/coverage-v8": "^4.1.8",
+    "eslint": "^8.57.0",
+    "eslint-plugin-n8n-nodes-base": "^1.16.7",
+    "n8n-workflow": "^2.16.0",
+    "typescript": "^5.4.0",
+    "vitest": "^4.1.8",
+    "@n8n/node-cli": "^0.43.4"
+  }
+}

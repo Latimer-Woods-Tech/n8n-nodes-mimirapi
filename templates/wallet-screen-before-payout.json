@@ -1,0 +1,126 @@
+{
+  "name": "Screen a wallet before you pay it (MimirAPI)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wallet-screen",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000001",
+      "name": "Payout Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "wallet-screen-before-payout"
+    },
+    {
+      "parameters": {
+        "operation": "walletScreen",
+        "address": "={{ $json.body.address }}"
+      },
+      "id": "a1000000-0000-4000-8000-000000000002",
+      "name": "MimirAPI Wallet Screen",
+      "type": "n8n-nodes-mimirapi.mimirApi",
+      "typeVersion": 1,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "loose", "version": 2 },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.sanctioned }}",
+              "rightValue": "",
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000003",
+      "name": "Sanctioned?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [440, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "loose", "version": 2 },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.sanctioned }}",
+              "rightValue": "",
+              "operator": { "type": "boolean", "operation": "false", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000004",
+      "name": "Verified Clear?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [660, 120]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"decision\": \"block\", \"reason\": \"address is on the sanctions oracle\", \"address\": $('Payout Request').item.json.body.address } }}",
+        "options": { "responseCode": 451 }
+      },
+      "id": "a1000000-0000-4000-8000-000000000005",
+      "name": "Block Payout",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [660, -120]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"decision\": \"clear\", \"address\": $('Payout Request').item.json.body.address } }}",
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000006",
+      "name": "Clear to Pay",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [880, 60]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"decision\": \"hold\", \"reason\": \"sanctions oracle unavailable (sanctioned=null) — do not treat unknown as clear\", \"address\": $('Payout Request').item.json.body.address } }}",
+        "options": { "responseCode": 503 }
+      },
+      "id": "a1000000-0000-4000-8000-000000000007",
+      "name": "Hold — Oracle Unavailable",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [880, 200]
+    }
+  ],
+  "connections": {
+    "Payout Request": { "main": [[{ "node": "MimirAPI Wallet Screen", "type": "main", "index": 0 }]] },
+    "MimirAPI Wallet Screen": { "main": [[{ "node": "Sanctioned?", "type": "main", "index": 0 }]] },
+    "Sanctioned?": {
+      "main": [
+        [{ "node": "Block Payout", "type": "main", "index": 0 }],
+        [{ "node": "Verified Clear?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Verified Clear?": {
+      "main": [
+        [{ "node": "Clear to Pay", "type": "main", "index": 0 }],
+        [{ "node": "Hold — Oracle Unavailable", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

@@ -1,0 +1,87 @@
+{
+  "name": "Route new leads by phone line type (MimirAPI)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-phone",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "b2000000-0000-4000-8000-000000000001",
+      "name": "New Lead",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "lead-phone-intel-router"
+    },
+    {
+      "parameters": {
+        "operation": "phoneIntel",
+        "phoneNumber": "={{ $json.body.phone }}"
+      },
+      "id": "b2000000-0000-4000-8000-000000000002",
+      "name": "MimirAPI Phone Intel",
+      "type": "n8n-nodes-mimirapi.mimirApi",
+      "typeVersion": 1,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "loose", "version": 2 },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.lineType }}",
+              "rightValue": "mobile",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b2000000-0000-4000-8000-000000000003",
+      "name": "Mobile?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [440, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"route\": \"sms-sequence\", \"number\": $json.number, \"carrier\": $json.carrier, \"country\": $json.countryCode } }}",
+        "options": {}
+      },
+      "id": "b2000000-0000-4000-8000-000000000004",
+      "name": "Mobile → SMS Sequence",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [660, -100]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"route\": \"email-or-call\", \"reason\": \"lineType is \" + ($json.lineType ?? \"unknown\") + \" — do not burn SMS credits\", \"number\": $json.number, \"carrier\": $json.carrier, \"country\": $json.countryCode } }}",
+        "options": {}
+      },
+      "id": "b2000000-0000-4000-8000-000000000005",
+      "name": "Not Mobile → Email/Call",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [660, 100]
+    }
+  ],
+  "connections": {
+    "New Lead": { "main": [[{ "node": "MimirAPI Phone Intel", "type": "main", "index": 0 }]] },
+    "MimirAPI Phone Intel": { "main": [[{ "node": "Mobile?", "type": "main", "index": 0 }]] },
+    "Mobile?": {
+      "main": [
+        [{ "node": "Mobile → SMS Sequence", "type": "main", "index": 0 }],
+        [{ "node": "Not Mobile → Email/Call", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}
