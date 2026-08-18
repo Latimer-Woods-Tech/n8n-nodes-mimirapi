@@ -1,3 +1,4 @@
+import { NodeConnectionTypes } from 'n8n-workflow';
 import type { INodeProperties, INodeType, INodeTypeDescription } from 'n8n-workflow';
 
 /** Chart operation fields (`POST /v1/chart`). */
@@ -275,14 +276,15 @@ export class MimirApi implements INodeType {
   description: INodeTypeDescription = {
     displayName: 'MimirAPI',
     name: 'mimirApi',
-    icon: 'fa:coins',
+    icon: { light: 'file:mimirapi.svg', dark: 'file:mimirapi.dark.svg' },
     group: ['transform'],
     version: 1,
     subtitle: '={{$parameter["operation"]}}',
     description: 'Pay-per-call tools for agents over x402 — no API key, no signup (mimirapi.com)',
     defaults: { name: 'MimirAPI' },
-    inputs: ['main'],
-    outputs: ['main'],
+    usableAsTool: true,
+    inputs: [NodeConnectionTypes.Main],
+    outputs: [NodeConnectionTypes.Main],
     credentials: [{ name: 'mimirApiApi', required: true }],
     requestDefaults: {
       baseURL: '={{$credentials.baseUrl || "https://mimirapi.com"}}',

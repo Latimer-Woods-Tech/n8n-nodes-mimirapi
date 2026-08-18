@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-mimirapi",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "n8n community node for MimirAPI \u2014 pay-per-call tools for agents over x402 (USDC on Base): provenance certificates, QR / social-card / chart SVGs, price routing, phone intel, and more. No API key, no signup.",
   "keywords": [
     "n8n-community-node-package",
@@ -17,7 +17,8 @@
   "license": "MIT",
   "homepage": "https://mimirapi.com",
   "author": {
-    "name": "Latimer Woods Tech"
+    "name": "Latimer Woods Tech",
+    "email": "partners@latwoodtech.com"
   },
   "repository": {
     "type": "git",
@@ -30,7 +31,7 @@
     "node": ">=18.10"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node scripts/copy-icons.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage",
     "lint": "eslint nodes credentials --ext .ts --max-warnings 0",
@@ -62,8 +63,5 @@
     "typescript": "^5.4.0",
     "vitest": "^4.1.8",
     "@n8n/node-cli": "^0.43.4"
-  },
-  "overrides": {
-    "ignore": "^7.0.6"
   }
 }

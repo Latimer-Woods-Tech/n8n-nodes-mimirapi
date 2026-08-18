@@ -1,3 +1,7 @@
+## 0.1.2 (2026-08-18)
+
+- n8n verification-scanner conformance: credential test (free /health probe), themed SVG icons on node + credential, `usableAsTool: true`, `NodeConnectionTypes.Main` constants, author email, `overrides` field removed.
+
 ## 0.1.1 (2026-08-18)
 
 - Republished from the standalone public repository with npm provenance (required for n8n community-node verification).

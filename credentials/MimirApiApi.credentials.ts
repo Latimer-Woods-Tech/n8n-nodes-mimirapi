@@ -1,6 +1,8 @@
 import type {
   IAuthenticateGeneric,
+  ICredentialTestRequest,
   ICredentialType,
+  Icon,
   INodeProperties,
 } from 'n8n-workflow';
 
@@ -17,6 +19,11 @@ export class MimirApiApi implements ICredentialType {
   displayName = 'MimirAPI API';
 
   documentationUrl = 'https://mimirapi.com/llms.txt';
+
+  icon: Icon = {
+    light: 'file:../nodes/MimirApi/mimirapi.svg',
+    dark: 'file:../nodes/MimirApi/mimirapi.dark.svg',
+  };
 
   properties: INodeProperties[] = [
     {
@@ -43,6 +50,15 @@ export class MimirApiApi implements ICredentialType {
       headers: {
         'PAYMENT-SIGNATURE': '={{$credentials.paymentSignature}}',
       },
+    },
+  };
+
+  // Free liveness surface — works with a blank payment signature, so the
+  // credential test never spends money.
+  test: ICredentialTestRequest = {
+    request: {
+      baseURL: '={{$credentials.baseUrl || "https://mimirapi.com"}}',
+      url: '/health',
     },
   };
 }
