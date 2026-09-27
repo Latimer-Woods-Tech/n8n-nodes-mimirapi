@@ -11,11 +11,22 @@ export default defineConfig({
       // reporter output, no threshold change — the vitest floors below stay the
       // sole enforcement.
       reporter: ['text', 'lcov', 'json-summary'],
-      // Floor 0 onboarding (testing assembly line 2b): this declarative n8n
-      // community node has one smoke test today. Thresholds start at 0 so the
-      // package never blocks CI; the coverage-ratchet bot reads the measured
-      // numbers from studio_coverage and raises these floors as tests land.
-      thresholds: { lines: 0, functions: 0, branches: 0, statements: 0 },
+      // Ratchet closed 2026-09-27: the floors were 0 on all four axes, with the
+      // promotion left to a "coverage-ratchet bot". A threshold of 0 cannot
+      // reject anything, and nothing registered the ratchet, so it was never
+      // going to fire. Set to the MEASURED values instead — 18/18 statements
+      // and lines, with 0 branches and 0 functions in a purely declarative
+      // node — so adding an uncovered branch now fails here.
+      //
+      // Read the number honestly: for a declarative n8n node (a `description`
+      // object, no `execute()`) statement coverage is close to meaningless. The
+      // real guard is `test/mimirapi.property.test.ts`, which quantifies the
+      // structural laws — every operation routes somewhere well-formed, every
+      // field is gated to a declared operation and lands on the wire, the
+      // send-sms surface stays absent, no route ships a workers.dev origin —
+      // over the node's own finite declared domain. Coverage pins the file;
+      // the property suite pins the behaviour.
+      thresholds: { lines: 100, functions: 100, branches: 100, statements: 100 },
       include: ['nodes/**', 'credentials/**'],
       exclude: ['**/*.test.ts'],
     },
